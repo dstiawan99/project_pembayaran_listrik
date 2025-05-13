@@ -12,8 +12,8 @@ Aplikasi web pembayaran listrik pascabayar menggunakan PHP Native dan template S
 
 1. Clone atau download repositori ini
 2. Buat database baru di MySQL
-3. Import file database dari folder `database/pembayaran_listrik.sql`
-4. Konfigurasi koneksi database di file `config/koneksi.php`
+3. Import file database dari folder database/pembayaran_listrik.sql
+4. Konfigurasi koneksi database di file config/koneksi.php
 5. Akses aplikasi melalui web browser
 
 ## Akun Default
@@ -34,45 +34,48 @@ Aplikasi web pembayaran listrik pascabayar menggunakan PHP Native dan template S
 
 ## Struktur Project
 
-├───admin
-├───assets
-│ ├───css
-│ ├───img
-│ ├───js
-│ │ └───demo
-│ ├───scss
-│ │ ├───navs
-│ │ └───utilities
-│ └───vendor
-│ ├───bootstrap
-│ │ ├───js
-│ │ └───scss
-│ │ ├───mixins
-│ │ ├───utilities
-│ │ └───vendor
-│ ├───chart.js
-│ ├───datatables
-│ ├───fontawesome-free
-│ │ ├───css
-│ │ ├───js
-│ │ ├───less
-│ │ ├───metadata
-│ │ ├───scss
-│ │ ├───sprites
-│ │ ├───svgs
-│ │ │ ├───brands
-│ │ │ ├───regular
-│ │ │ └───solid
-│ │ └───webfonts
-│ ├───jquery
-│ └───jquery-easing
-├───cetak
-├───config
-├───database
-├───pages
-├───pelanggan
-├───proses
-└───template
+```
+project_pembayaran_listrik/
+├───admin/
+├───assets/
+│ ├───css/
+│ ├───img/
+│ ├───js/
+│ │ └───demo/
+│ ├───scss/
+│ │ ├───navs/
+│ │ └───utilities/
+│ └───vendor/
+│ ├───bootstrap/
+│ │ ├───js/
+│ │ └───scss/
+│ │ ├───mixins/
+│ │ ├───utilities/
+│ │ └───vendor/
+│ ├───chart.js/
+│ ├───datatables/
+│ ├───fontawesome-free/
+│ │ ├───css/
+│ │ ├───js/
+│ │ ├───less/
+│ │ ├───metadata/
+│ │ ├───scss/
+│ │ ├───sprites/
+│ │ ├───svgs/
+│ │ │ ├───brands/
+│ │ │ ├───regular/
+│ │ │ └───solid/
+│ │ └───webfonts/
+│ ├───jquery/
+│ └───jquery-easing/
+├───cetak/
+├───config/
+├───database/
+├───pages/
+├───pelanggan/
+├───proses/
+└───template/
+```
 
 ## Pengembangan
 
