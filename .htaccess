@@ -1,0 +1,12 @@
+Options -Indexes
+RewriteEngine On
+
+# Prevent redirect loops
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Handle any other URLs
+
+RewriteRule ^(.\*)$ index.php [QSA,L]

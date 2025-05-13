@@ -1,0 +1,84 @@
+/* Custom CSS untuk aplikasi pembayaran listrik */
+.invoice-badge {
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+}
+
+.meter-display {
+    background-color: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.bill-summary {
+    background-color: #f8f9fc;
+    border-left: 0.25rem solid #4e73df;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.bill-summary p {
+    margin-bottom: 0.5rem;
+}
+
+.bill-summary .total {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4e73df;
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 10rem;
+}
+
+.status-paid {
+    background-color: #1cc88a;
+    color: white;
+}
+
+.status-unpaid {
+    background-color: #f6c23e;
+    color: white;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #e3e6f0;
+}
+
+.dashboard-heading {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e3e6f0;
+    padding-bottom: 1rem;
+}
+
+.form-group label {
+    font-weight: 600;
+}
+
+.btn-action-group .btn {
+    margin-right: 0.5rem;
+}
+
+@media print {
+    .sidebar, .topbar, .footer, .btn-action, .no-print {
+        display: none !important;
+    }
+    .container, .container-fluid {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    .invoice-print {
+        padding: 30px;
+    }
+}
