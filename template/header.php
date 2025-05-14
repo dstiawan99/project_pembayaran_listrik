@@ -32,6 +32,9 @@ if ($current_folder == 'admin' && $level != 1) {
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css">
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -70,7 +73,7 @@ if ($current_folder == 'admin' && $level != 1) {
             <li class="nav-item">
                 <a class="nav-link" href="user.php">
                     <i class="fas fa-fw fa-user-cog"></i>
-                    <span>Data User</span>
+                    <span>Admin User</span>
                 </a>
             </li>
             <hr class="sidebar-divider">

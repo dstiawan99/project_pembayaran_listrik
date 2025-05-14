@@ -1,28 +1,59 @@
-<?php include '../template/header.php'; ?>
+<?php 
+include '../template/header.php';
 
-<!-- Page Heading -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-</div>
+// Hitung total pelanggan
+$query_pelanggan = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM pelanggan");
+$total_pelanggan = mysqli_fetch_assoc($query_pelanggan)['total'];
+
+// Hitung tagihan belum bayar
+$query_tagihan = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tagihan WHERE status = 'belum_bayar'");
+$tagihan_belum_bayar = mysqli_fetch_assoc($query_tagihan)['total'];
+
+// Hitung total pembayaran bulan ini
+$bulan_ini = date('m');
+$tahun_ini = date('Y');
+$query_pembayaran = mysqli_query($koneksi, "SELECT SUM(total_bayar) as total FROM pembayaran 
+                                           WHERE MONTH(tanggal_pembayaran) = '$bulan_ini' 
+                                           AND YEAR(tanggal_pembayaran) = '$tahun_ini'");
+$total_pembayaran = mysqli_fetch_assoc($query_pembayaran)['total'] ?? 0;
+
+// Hitung total admin
+$query_admin = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM user WHERE id_level = 1");
+$total_admin = mysqli_fetch_assoc($query_admin)['total'];
+
+// Data untuk grafik pembayaran bulanan
+$data_pembayaran = array_fill(0, 12, 0);
+$query_grafik = mysqli_query($koneksi, "SELECT MONTH(tanggal_pembayaran) as bulan, SUM(total_bayar) as total 
+                                       FROM pembayaran 
+                                       WHERE YEAR(tanggal_pembayaran) = '$tahun_ini' 
+                                       GROUP BY MONTH(tanggal_pembayaran)");
+while ($row = mysqli_fetch_assoc($query_grafik)) {
+    $data_pembayaran[$row['bulan']-1] = (float)$row['total'];
+}
+
+// Data untuk pie chart status tagihan
+$query_status = mysqli_query($koneksi, "SELECT status, COUNT(*) as total FROM tagihan GROUP BY status");
+$status_lunas = 0;
+$status_belum = 0;
+while ($row = mysqli_fetch_assoc($query_status)) {
+    if ($row['status'] == 'lunas') {
+        $status_lunas = $row['total'];
+    } else {
+        $status_belum = $row['total'];
+    }
+}
+?>
 
 <!-- Content Row -->
 <div class="row">
-
-    <!-- Total Pelanggan -->
+    <!-- Total Pelanggan Card -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Pelanggan</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?php
-                            $query_pelanggan = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM pelanggan");
-                            $data_pelanggan = mysqli_fetch_assoc($query_pelanggan);
-                            echo $data_pelanggan['total'];
-                            ?>
-                        </div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Pelanggan</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $total_pelanggan ?></div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -32,21 +63,14 @@
         </div>
     </div>
 
-    <!-- Tagihan Belum Bayar -->
+    <!-- Tagihan Belum Bayar Card -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Tagihan Belum Bayar</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?php
-                            $query_tagihan = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tagihan WHERE status='belum_bayar'");
-                            $data_tagihan = mysqli_fetch_assoc($query_tagihan);
-                            echo $data_tagihan['total'];
-                            ?>
-                        </div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tagihan Belum Bayar</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $tagihan_belum_bayar ?></div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
@@ -56,21 +80,14 @@
         </div>
     </div>
 
-    <!-- Total Pembayaran -->
+    <!-- Total Pembayaran Card -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total Pembayaran</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?php
-                            $query_pembayaran = mysqli_query($koneksi, "SELECT SUM(total_bayar) as total FROM pembayaran");
-                            $data_pembayaran = mysqli_fetch_assoc($query_pembayaran);
-                            echo formatRupiah($data_pembayaran['total'] ?? 0);
-                            ?>
-                        </div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Pembayaran (Bulan Ini)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?= formatRupiah($total_pembayaran) ?></div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-money-bill fa-2x text-gray-300"></i>
@@ -80,21 +97,14 @@
         </div>
     </div>
 
-    <!-- Total User -->
+    <!-- Total Admin Card -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Total Admin</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?php
-                            $query_user = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM user");
-                            $data_user = mysqli_fetch_assoc($query_user);
-                            echo $data_user['total'];
-                            ?>
-                        </div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Admin</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $total_admin ?></div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-user-cog fa-2x text-gray-300"></i>
@@ -107,11 +117,11 @@
 
 <!-- Content Row -->
 <div class="row">
-    <!-- Grafik Pembayaran -->
+    <!-- Area Chart -->
     <div class="col-xl-8 col-lg-7">
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Grafik Pembayaran Bulanan</h6>
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Grafik Pembayaran Bulanan <?= $tahun_ini ?></h6>
             </div>
             <div class="card-body">
                 <div class="chart-area">
@@ -124,7 +134,7 @@
     <!-- Pie Chart -->
     <div class="col-xl-4 col-lg-5">
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Status Tagihan</h6>
             </div>
             <div class="card-body">
@@ -144,185 +154,81 @@
     </div>
 </div>
 
-<!-- Data untuk Grafik -->
-<?php
-// Data untuk area chart (pembayaran bulanan)
-$bulan_nama = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-$data_bulanan = array_fill(0, 12, 0);
-
-$tahun_ini = date('Y');
-$query_chart = mysqli_query($koneksi, "SELECT MONTH(tanggal_pembayaran) as bulan, SUM(total_bayar) as total 
-                FROM pembayaran 
-                WHERE YEAR(tanggal_pembayaran) = '$tahun_ini' 
-                GROUP BY MONTH(tanggal_pembayaran)");
-
-while ($row = mysqli_fetch_assoc($query_chart)) {
-    $index = (int)$row['bulan'] - 1;
-    $data_bulanan[$index] = (float)$row['total'];
-}
-
-// Data untuk pie chart (status tagihan)
-$query_pie = mysqli_query($koneksi, "SELECT status, COUNT(*) as jumlah FROM tagihan GROUP BY status");
-$data_lunas = 0;
-$data_belum = 0;
-
-while ($row = mysqli_fetch_assoc($query_pie)) {
-    if ($row['status'] == 'lunas') {
-        $data_lunas = (int)$row['jumlah'];
-    } else {
-        $data_belum = (int)$row['jumlah'];
-    }
-}
-?>
-
 <script>
 // Area Chart
-document.addEventListener('DOMContentLoaded', function() {
-    var ctx = document.getElementById("myAreaChart");
-    var myLineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($bulan_nama) ?>,
-            datasets: [{
-                label: "Pendapatan",
-                lineTension: 0.3,
-                backgroundColor: "rgba(78, 115, 223, 0.05)",
-                borderColor: "rgba(78, 115, 223, 1)",
-                pointRadius: 3,
-                pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                pointBorderColor: "rgba(78, 115, 223, 1)",
-                pointHoverRadius: 3,
-                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                pointHitRadius: 10,
-                pointBorderWidth: 2,
-                data: <?= json_encode($data_bulanan) ?>,
-            }],
-        },
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 10,
-                    right:
-                    right: 25,
-                    top: 25,
-                    bottom: 0
+var ctx = document.getElementById("myAreaChart");
+var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: "Pendapatan",
+            lineTension: 0.3,
+            backgroundColor: "rgba(78, 115, 223, 0.05)",
+            borderColor: "rgba(78, 115, 223, 1)",
+            pointRadius: 3,
+            pointBackgroundColor: "rgba(78, 115, 223, 1)",
+            pointBorderColor: "rgba(78, 115, 223, 1)",
+            pointHoverRadius: 3,
+            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+            pointHitRadius: 10,
+            pointBorderWidth: 2,
+            data: <?= json_encode($data_pembayaran) ?>,
+        }],
+    },
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                    callback: function(value) {
+                        return 'Rp' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    }
                 }
-            },
-            scales: {
-                xAxes: [{
-                    time: {
-                        unit: 'date'
-                    },
-                    gridLines: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    ticks: {
-                        maxTicksLimit: 7
-                    }
-                }],
-                yAxes: [{
-                    ticks: {
-                        maxTicksLimit: 5,
-                        padding: 10,
-                        callback: function(value, index, values) {
-                            return 'Rp' + number_format(value);
-                        }
-                    },
-                    gridLines: {
-                        color: "rgb(234, 236, 244)",
-                        zeroLineColor: "rgb(234, 236, 244)",
-                        drawBorder: false,
-                        borderDash: [2],
-                        zeroLineBorderDash: [2]
-                    }
-                }],
-            },
-            legend: {
-                display: false
-            },
-            tooltips: {
-                backgroundColor: "rgb(255,255,255)",
-                bodyFontColor: "#858796",
-                titleMarginBottom: 10,
-                titleFontColor: '#6e707e',
-                titleFontSize: 14,
-                borderColor: '#dddfeb',
-                borderWidth: 1,
-                xPadding: 15,
-                yPadding: 15,
-                displayColors: false,
-                intersect: false,
-                mode: 'index',
-                caretPadding: 10,
-                callbacks: {
-                    label: function(tooltipItem, chart) {
-                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                        return datasetLabel + ': Rp' + number_format(tooltipItem.yLabel);
-                    }
+            }]
+        },
+        tooltips: {
+            callbacks: {
+                label: function(tooltipItem, chart) {
+                    return 'Rp' + tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 }
             }
         }
-    });
-
-    // Pie Chart
-    var ctx2 = document.getElementById("myPieChart");
-    var myPieChart = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: ["Lunas", "Belum Bayar"],
-            datasets: [{
-                data: [<?= $data_lunas ?>, <?= $data_belum ?>],
-                backgroundColor: ['#1cc88a', '#f6c23e'],
-                hoverBackgroundColor: ['#17a673', '#f4b619'],
-                hoverBorderColor: "rgba(234, 236, 244, 1)",
-            }],
-        },
-        options: {
-            maintainAspectRatio: false,
-            tooltips: {
-                backgroundColor: "rgb(255,255,255)",
-                bodyFontColor: "#858796",
-                borderColor: '#dddfeb',
-                borderWidth: 1,
-                xPadding: 15,
-                yPadding: 15,
-                displayColors: false,
-                caretPadding: 10,
-            },
-            legend: {
-                display: false
-            },
-            cutoutPercentage: 80,
-        },
-    });
-
-    // Number format utility function
-    function number_format(number, decimals, dec_point, thousands_sep) {
-        // *     example: number_format(1234.56, 2, ',', ' ');
-        // *     return: '1 234,56'
-        number = (number + '').replace(',', '').replace(' ', '');
-        var n = !isFinite(+number) ? 0 : +number,
-            prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-            sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
-            dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
-            s = '',
-            toFixedFix = function(n, prec) {
-                var k = Math.pow(10, prec);
-                return '' + Math.round(n * k) / k;
-            };
-        s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
-        if (s[0].length > 3) {
-            s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
-        }
-        if ((s[1] || '').length < prec) {
-            s[1] = s[1] || '';
-            s[1] += new Array(prec - s[1].length + 1).join('0');
-        }
-        return s.join(dec);
     }
+});
+
+// Pie Chart
+var ctx2 = document.getElementById("myPieChart");
+var myPieChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: ["Lunas", "Belum Bayar"],
+        datasets: [{
+            data: [<?= $status_lunas ?>, <?= $status_belum ?>],
+            backgroundColor: ['#1cc88a', '#f6c23e'],
+            hoverBackgroundColor: ['#17a673', '#f4b619'],
+            hoverBorderColor: "rgba(234, 236, 244, 1)",
+        }],
+    },
+    options: {
+        maintainAspectRatio: false,
+        tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            caretPadding: 10,
+        },
+        legend: {
+            display: false
+        },
+        cutoutPercentage: 80,
+    },
 });
 </script>
 
